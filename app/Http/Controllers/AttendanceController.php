@@ -62,7 +62,7 @@ class AttendanceController extends Controller
             if ($existing) {
                 return response()->json([
                     'status_code' => 409,
-                    'message' => 'You have already clocked in today.',
+                    'message' => 'Kamu Sudah Presensi Hari Ini.',
                 ], 409);
             }
 
@@ -71,7 +71,7 @@ class AttendanceController extends Controller
             if (!$location) {
                 return response()->json([
                     'status_code' => 404,
-                    'message' => 'You are outside the allowed location radius.',
+                    'message' => 'Kamu diluar Radius Lokasi Presensi.',
                     'data' => null,
                 ], 404);
             }
@@ -290,6 +290,41 @@ class AttendanceController extends Controller
                 'status_code' => 500,
                 'message' => 'Internal Server Error: ' . $e->getMessage(),
                 'data' => null,
+            ], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $attendance = Attendance::find($id);
+
+            if (! $attendance) {
+                return response()->json([
+                    'status_code' => 404,
+                    'message' => 'Attendance record not found',
+                ], 404);
+            }
+
+            foreach (['photo_clock_in', 'photo_clock_out'] as $field) {
+                if ($attendance->{$field}) {
+                    $path = storage_path('app/private/attendance_photos/' . $attendance->{$field});
+                    if (file_exists($path)) {
+                        unlink($path);
+                    }
+                }
+            }
+
+            $attendance->delete();
+
+            return response()->json([
+                'status_code' => 200,
+                'message' => 'Data Kehadiran Berhasil Dihapus',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status_code' => 500,
+                'message' => 'Internal Server Error: ' . $e->getMessage(),
             ], 500);
         }
     }

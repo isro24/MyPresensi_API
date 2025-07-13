@@ -48,6 +48,7 @@ Route::middleware('auth:api')->group(function () {
 
         //Employee Attendance Management
         Route::get('/admin/attendance', [AttendanceController::class, 'getAttendanceByAdmin']);
+        Route::delete('/admin/attendance/{id}', [AttendanceController::class, 'destroy']);
 
         //Profile
         Route::get('/admin/profile', [ProfileController::class, 'getAdminProfile']);
